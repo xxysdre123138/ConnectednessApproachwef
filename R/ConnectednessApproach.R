@@ -14,7 +14,7 @@
 #' @examples
 #' \donttest{
 #' data("acg2020")
-#' dca = ConnectednessApproach(acg2020, 
+#' dca = ConnectednessApproach(cgs2021, 
 #'                             nlag=1, 
 #'                             nfore=12,
 #'                             model="TVP-VAR",
