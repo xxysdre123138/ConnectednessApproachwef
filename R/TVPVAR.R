@@ -5,7 +5,9 @@
 #' @param nlag Lag length
 #' @param prior List of prior VAR coefficients and variance-covariance matrix
 #' @param l forgetting factors (kappa1, kappa2)
-
+#' @param configuration model configuration
+#' @return Estimate TVP-VAR model
+#' @examples
 #' \donttest{
 #' data(dy2012)
 #' prior = BayesPrior(dy2012, nlag=1)
