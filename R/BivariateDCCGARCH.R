@@ -8,36 +8,52 @@
 #' @param transformation "parametric", "empirical" or "spd" (see, rmgarch package)
 #' @param time.varying Boolean value to either choose DCC-GARCH or CCC-GARCH
 #' @param asymmetric Whether to include an asymmetry term to the DCC model (thus estimating the aDCC).
+#' @param eval.se Boolean value to compute standard errors
 #' @return Estimate Bivariate DCC-GARCH
 #' @importFrom rmgarch cgarchspec
 #' @importFrom rmgarch cgarchfit
 #' @importFrom rmgarch rcor
 #' @importFrom rmgarch rcov
+#' @importFrom zoo zoo
 #' @references
+#' Cocca, T., Gabauer, D., & Pomberger, S. (2024). Clean energy market connectedness and investment strategies: New evidence from DCC-GARCH R2 decomposed connectedness measures. Energy Economics.
+#' 
 #' Engle, R. (2002). Dynamic conditional correlation: A simple class of multivariate generalized autoregressive conditional heteroskedasticity models. Journal of Business & Economic Statistics, 20(3), 339-350.
 #' @author David Gabauer
 #' @export
-BivariateDCCGARCH = function(x, spec, copula="mvt", method="Kendall", transformation="parametric", time.varying=TRUE, asymmetric=FALSE) {
+BivariateDCCGARCH = function (x, spec, copula = "mvt", method = "Kendall", transformation = "parametric", 
+                              time.varying = TRUE, asymmetric = FALSE, eval.se = FALSE) {
   if (!is(x, "zoo")) {
     stop("Data needs to be of type 'zoo'")
   }
   t = nrow(x)
   k = ncol(x)
   NAMES = colnames(x)
-  Z = NULL
-  H = R = array(NA, c(k,k,t), dimnames=list(NAMES, NAMES, as.character(rownames(x))))
+  Z_t = NULL
+  H_t = R_t = array(1, c(k, k, t), dimnames = list(NAMES, 
+                                                   NAMES, as.character(index(x))))
   for (i in 1:k) {
     for (j in 1:k) {
-      if (i>j) {
-        mgarch.spec = rmgarch::cgarchspec(uspec=multispec(c(spec[i], spec[j])), dccOrder=c(1,1), asymmetric=asymmetric,
-                                          distribution.model=list(copula=copula, method=method, time.varying=time.varying, transformation=transformation))
-        copula_fit = rmgarch::cgarchfit(mgarch.spec, data=x[,c(i,j)], solver=c("hybrid", "solnp"), fit.control=list(eval.se=FALSE))
-        R[c(i,j),c(i,j),] = rcor(copula_fit)
-        H[c(i,j),c(i,j),] = rcov(copula_fit)
+      if (i < j) {
+        print(paste("DCC-GARCH estimation based on", NAMES[i], "and", NAMES[j]))
+        mgarch.spec = rmgarch::cgarchspec(uspec = multispec(c(spec[i], 
+                                                              spec[j])), dccOrder = c(1, 1), asymmetric = asymmetric, 
+                                          distribution.model = list(copula = copula, 
+                                                                    method = method, time.varying = time.varying, 
+                                                                    transformation = transformation))
+        copula_fit = rmgarch::cgarchfit(mgarch.spec, 
+                                        data = x[, c(i, j)], solver = c("hybrid", "solnp"), 
+                                        fit.control = list(eval.se = eval.se))
+        print(copula_fit)
+        r = rcor(copula_fit)
+        h = rcov(copula_fit)
+        R_t[c(i, j), c(i, j), ] = r
+        H_t[c(i, j), c(i, j), ] = h
       }
     }
-    Z = cbind(Z, copula_fit@mfit$Z[,1])
+    Z_t = cbind(Z_t, copula_fit@mfit$Z[, 1])
   }
-  return = list(H=H, R=R, Z=Z)
+  colnames(Z_t) = NAMES
+  return = list(H_t=H_t, R_t=R_t, Z_t=zoo::zoo(Z_t, as.Date(index(x))))
 }
 

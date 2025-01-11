@@ -11,7 +11,8 @@ BivariateDCCGARCH(
   method = "Kendall",
   transformation = "parametric",
   time.varying = TRUE,
-  asymmetric = FALSE
+  asymmetric = FALSE,
+  eval.se = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ BivariateDCCGARCH(
 \item{time.varying}{Boolean value to either choose DCC-GARCH or CCC-GARCH}
 
 \item{asymmetric}{Whether to include an asymmetry term to the DCC model (thus estimating the aDCC).}
+
+\item{eval.se}{Boolean value to compute standard errors}
 }
 \value{
 Estimate Bivariate DCC-GARCH
@@ -36,6 +39,8 @@ Estimate Bivariate DCC-GARCH
 This function multiple Bivariate DCC-GARCH models that captures more accurately conditional covariances and correlations
 }
 \references{
+Cocca, T., Gabauer, D., & Pomberger, S. (2024). Clean energy market connectedness and investment strategies: New evidence from DCC-GARCH R2 decomposed connectedness measures. Energy Economics.
+
 Engle, R. (2002). Dynamic conditional correlation: A simple class of multivariate generalized autoregressive conditional heteroskedasticity models. Journal of Business & Economic Statistics, 20(3), 339-350.
 }
 \author{
